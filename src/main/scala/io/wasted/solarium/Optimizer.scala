@@ -3,8 +3,7 @@
 
 package io.wasted.solarium
 
-import Ast._
-import io.wasted.solarium.Ast.AbstractClause
+import io.wasted.solarium.Ast.{ AbstractClause, _ }
 
 object Optimizer {
 

@@ -5,27 +5,23 @@ package io.wasted.solarium
 
 import java.util
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.{ ExecutorService, Executors }
 
-import Ast._
 import com.fasterxml.jackson.annotation.{ JsonCreator, JsonProperty }
-import com.fasterxml.jackson.databind.{ DeserializationFeature, DeserializationConfig, ObjectMapper }
+import com.fasterxml.jackson.databind.{ DeserializationFeature, ObjectMapper }
 import com.twitter.conversions.time._
-import java.util.{ ArrayList, Arrays, HashMap }
-import java.util.concurrent.{ Executors, ExecutorService }
-import com.twitter.util.{ Await, FuturePool, Future, Duration }
+import com.twitter.util.{ Await, Duration, Future, FuturePool }
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import io.netty.util.CharsetUtil
-import io.wasted.solarium.Ast.{ Clause, ScoreBoost, Query }
+import io.wasted.solarium.Ast.{ Clause, Query, ScoreBoost, _ }
 import io.wasted.util.Logger
 import io.wasted.util.http._
 import net.liftweb.common.{ Box, Empty, Full }
-import net.liftweb.record.{ Record, OwnedField, Field, MetaRecord }
-import net.liftweb.record.field.{ BooleanField, LongField, StringField, IntField, DoubleField }
+import net.liftweb.record.field.{ BooleanField, DoubleField, IntField, LongField, StringField }
+import net.liftweb.record.{ Field, MetaRecord, OwnedField, Record }
 import org.bson.types.ObjectId
-import org.elasticsearch.action.search.SearchRequestBuilder
-import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.action.search.SearchType
+import org.elasticsearch.action.search.{ SearchRequestBuilder, SearchResponse, SearchType }
 import org.elasticsearch.client.Client
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.ImmutableSettings
@@ -34,19 +30,14 @@ import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.QueryBuilders.filteredQuery
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder
 import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder
-import org.elasticsearch.index.query.{
-  AndFilterBuilder,
-  BoostingQueryBuilder,
-  FilterBuilder => ElasticFilterBuilder,
-  QueryBuilder => ElasticQueryBuilder,
-  QueryBuilders => EQueryBuilders
-}
+import org.elasticsearch.index.query.{ AndFilterBuilder, BoostingQueryBuilder, FilterBuilder => ElasticFilterBuilder, QueryBuilder => ElasticQueryBuilder, QueryBuilders => EQueryBuilders }
 import org.elasticsearch.node.Node
 import org.elasticsearch.search.facet.FacetBuilder
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet
 import org.elasticsearch.search.sort.{ ScriptSortBuilder, SortOrder }
 import org.joda.time.DateTime
+
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 

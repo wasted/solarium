@@ -4,13 +4,12 @@
 package io.wasted.solarium
 
 import java.util
+import java.util.concurrent.TimeUnit
 
 import com.twitter.util.{ Duration, Future }
-import Ast._
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
 import io.wasted.solarium.Ast._
 import net.liftweb.record.Record
+
 import scala.collection.JavaConverters._
 
 // Phantom types
@@ -78,7 +77,6 @@ case class QueryBuilder[M <: Record[M], Ord, Lim, MM <: MinimumMatchType, Y, H <
 
   val DefaultLimit = 10
   val DefaultStart = 0
-  import Helpers._
 
   def and(c: M => AbstractClause): QueryBuilder[M, Ord, Lim, MM, Y, H, Q, MinFacetCount, FacetLimit, ST] = {
     clauses match {

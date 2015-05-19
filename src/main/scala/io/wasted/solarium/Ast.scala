@@ -3,13 +3,7 @@
 
 package io.wasted.solarium
 
-import org.elasticsearch.index.query.{
-  FilterBuilder => ElasticFilterBuilder,
-  FilterBuilders => EFilterBuilders,
-  QueryBuilder => ElasticQueryBuilder,
-  QueryBuilders => EQueryBuilders,
-  QueryStringQueryBuilder
-}
+import org.elasticsearch.index.query.{ FilterBuilder => ElasticFilterBuilder, FilterBuilders => EFilterBuilders, QueryBuilder => ElasticQueryBuilder, QueryBuilders => EQueryBuilders, QueryStringQueryBuilder }
 
 /**
  * Abstract Syntax Tree used to represent queries.
