@@ -394,10 +394,12 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
     request.headers.add(HttpHeaders.Names.CONTENT_LENGTH, bytes.length.toString)
     val uri = new java.net.URI(queryPath)
     client.write(uri, () => request).map { response =>
-      response.getStatus match {
+      val r = response.getStatus match {
         case HttpResponseStatus.OK => response.content().toString(CharsetUtil.UTF_8)
         case status => throw SolrResponseException(status.code, status.reasonPhrase, solrName, qse.toString)
       }
+      response.release()
+      r
     }
   }
 

@@ -9,7 +9,7 @@
 
 ```
   resolvers += "wasted.io/repo" at "http://repo.wasted.io/mvn"
-  libraryDependencies += "io.wasted" %% "solarium" % "0.0.1"
+  libraryDependencies += "io.wasted" %% "solarium" % "0.0.2"
 ```
 
 ## License
