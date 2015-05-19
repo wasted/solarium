@@ -1,6 +1,6 @@
 package io.wasted.solarium
 
-import com.twitter.util.Awaitable
+import com.twitter.util.Future
 import io.netty.handler.codec.http.{ FullHttpResponse, HttpHeaders, HttpMethod }
 import io.netty.util.CharsetUtil
 import net.liftweb.json._
@@ -29,7 +29,7 @@ trait RecordToSolr[T <: SolrSchema[T]] { this: SolrSchema[T] =>
    * Save this record to SOLR
    * @return Future HTTP Response
    */
-  def saveToSolr(): Awaitable[FullHttpResponse] = {
+  def saveToSolr(): Future[FullHttpResponse] = {
     val (host, client) = meta.getClient
     val json = Serialization.write(List(asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
     val hdrs = Map(HttpHeaders.Names.HOST -> host)
@@ -40,7 +40,7 @@ trait RecordToSolr[T <: SolrSchema[T]] { this: SolrSchema[T] =>
    * Save a collection of records to SOLR
    * @return Future HTTP Response
    */
-  def saveToSolr(list: Iterator[T with RecordToSolr[T]]): Awaitable[FullHttpResponse] = {
+  def saveToSolr(list: Iterator[T with RecordToSolr[T]]): Future[FullHttpResponse] = {
     val (host, client) = meta.getClient
     val json = Serialization.write(list.map(_.asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
     val hdrs = Map(HttpHeaders.Names.HOST -> host)
@@ -51,7 +51,7 @@ trait RecordToSolr[T <: SolrSchema[T]] { this: SolrSchema[T] =>
    * Save a collection of records to SOLR
    * @return Future HTTP Response
    */
-  def saveToSolr(list: Iterable[T with RecordToSolr[T]]): Awaitable[FullHttpResponse] = {
+  def saveToSolr(list: Iterable[T with RecordToSolr[T]]): Future[FullHttpResponse] = {
     val (host, client) = meta.getClient
     val json = Serialization.write(list.map(_.asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
     val hdrs = Map(HttpHeaders.Names.HOST -> host)
@@ -62,7 +62,7 @@ trait RecordToSolr[T <: SolrSchema[T]] { this: SolrSchema[T] =>
    * Commit changes on this core/collection to SOLR
    * @return Future HTTP Response
    */
-  final def commitToSolr(): Awaitable[FullHttpResponse] = {
+  final def commitToSolr(): Future[FullHttpResponse] = {
     val (host, client) = meta.getClient
     val hdrs = Map(HttpHeaders.Names.HOST -> host)
     client.get(new java.net.URI("http://%s%s?commit=true".format(host, updatePath)), hdrs)
