@@ -2,7 +2,7 @@ import scalariform.formatter.preferences._
 
 name := "solarium"
 
-version := "0.0.1"
+version := scala.io.Source.fromFile("version").mkString.trim
 
 organization := "io.wasted"
 
