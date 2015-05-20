@@ -17,7 +17,7 @@ libraryDependencies ++= {
   Seq(
     "net.liftweb"               %% "lift-record"          % liftVer       % "compile",
     "net.liftweb"               %% "lift-json"            % liftVer       % "compile",
-    "io.wasted"                 %% "wasted-util"          % "0.9.5"       % "compile",
+    "io.wasted"                 %% "wasted-util"          % "0.10.0"      % "compile",
     "com.fasterxml.jackson.core" % "jackson-databind"     % "2.5.3"       % "compile",
     "org.mongodb"                % "bson"                 % "3.0.1"       % "compile"
       exclude("org.slf4j", "slf4j-api"),

@@ -293,7 +293,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   val requestCounter = new AtomicLong()
   protected val clients = servers.map { server =>
     server._1 -> HttpClient[FullHttpResponse]()
-      .withSpecifics(HttpCodec().withDecompression(decompression = false))
+      .withSpecifics(NettyHttpCodec().withDecompression(decompression = false))
       .withTcpKeepAlive(solrKeepAlive)
       .withTcpConnectTimeout(solrTcpConnectTimeout)
       .withTcpNoDelay(tcpNoDelay = true)
