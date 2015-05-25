@@ -290,13 +290,18 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   def solrTcpConnectTimeout: Duration = 10.seconds
   def solrTimeout: Duration = 30.seconds
   def solrKeepAlive: Boolean = true
+  def solrRetries: Int = 1
   val requestCounter = new AtomicLong()
+  val httpCodec = NettyHttpCodec[HttpRequest, FullHttpResponse]()
+    .withDecompression(decompression = false)
   protected val clients = servers.map { server =>
     server._1 -> HttpClient[FullHttpResponse]()
-      .withSpecifics(NettyHttpCodec().withDecompression(decompression = false))
+      .withSpecifics(httpCodec)
+      .withRequestTimeout(solrTimeout)
       .withTcpKeepAlive(solrKeepAlive)
       .withTcpConnectTimeout(solrTcpConnectTimeout)
       .withTcpNoDelay(tcpNoDelay = true)
+      .withRetries(solrRetries)
       .connectTo(server._1, server._2)
   }
 
@@ -330,7 +335,6 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
       val rsr = mapper.readValue(r, classOf[RawSearchResults])
       // Take the raw search result and make the type templated search result.
       val rawDocs = rsr.response.docs
-      val rawHls = rsr.highlighting
       val joinedDocs: Array[(Map[String, Any], Option[Map[String, util.ArrayList[String]]])] = rawDocs.map(jdoc => {
         val doc = jdoc.asScala
         val hl = if (doc.contains("id") && rsr.highlighting != null) {
