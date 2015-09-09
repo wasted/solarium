@@ -40,6 +40,7 @@ import org.joda.time.DateTime
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+import scala.xml.NodeSeq
 
 /**
  * SolrResponseException class that extends RuntimeException
@@ -1188,14 +1189,17 @@ class ObjectIdField[T <: Record[T]](override val owner: T) extends Field[ObjectI
     val vb = valueBoxFromAny(a)
     vb.map(set)
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    jv.extractOpt[String].flatMap(s => net.liftweb.util.Helpers.tryo(new ObjectId(s)))
+  }
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1253,14 +1257,17 @@ class IntListField[T <: Record[T]](override val owner: T) extends Field[List[Int
       case _: Throwable => Empty
     }
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    jv.extractOpt[List[Int]]
+  }
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1295,14 +1302,17 @@ class LongListField[T <: Record[T]](override val owner: T) extends Field[List[Lo
       case _: Throwable => Empty
     }
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    jv.extractOpt[List[Long]]
+  }
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1340,14 +1350,17 @@ class ObjectIdListField[T <: Record[T]](override val owner: T) extends Field[Lis
     val vb = valueBoxFromAny(a)
     vb.map(set)
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    jv.extractOpt[List[String]].map(_.flatMap(s => net.liftweb.util.Helpers.tryo(new ObjectId(s))))
+  }
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1377,14 +1390,17 @@ class StringListField[T <: Record[T]](override val owner: T) extends Field[List[
       case _: Throwable => Empty
     }
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    jv.extractOpt[List[String]]
+  }
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1425,14 +1441,14 @@ class PointField[T <: Record[T]](override val owner: T) extends Field[(Double, D
       case _: Throwable => Empty
     }
   }
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[ValueType] = Empty
+  override def liftSetFilterToBox(a: Box[ValueType]): Box[ValueType] = Empty
+  override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
+  override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
     e = Full(a)
     a.asInstanceOf[ValueType]
@@ -1445,14 +1461,14 @@ class PointField[T <: Record[T]](override val owner: T) extends Field[(Double, D
 class DummyField[V, T <: Record[T]](override val owner: T) extends Field[V, T] {
   override def setFromString(s: String): Box[V] = Empty
   override def setFromAny(a: Any): Box[V] = Empty
-  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = Empty
-  override def liftSetFilterToBox(a: Box[V]) = Empty
-  override def toBoxMyType(a: ValueType) = Empty
-  override def defaultValueBox = Empty
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue): Box[V] = Empty
+  override def liftSetFilterToBox(a: Box[V]): Box[V] = Empty
+  override def toBoxMyType(a: ValueType): Box[V] = Empty
+  override def defaultValueBox: Box[V] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue = net.liftweb.json.JsonAST.JNothing
-  override def asJs = net.liftweb.http.js.JE.JsNull
-  override def toForm = Empty
+  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
+  override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = null.asInstanceOf[ValueType]
   override def get = null.asInstanceOf[ValueType]
   override def is = null.asInstanceOf[ValueType]
