@@ -1197,7 +1197,9 @@ class ObjectIdField[T <: Record[T]](override val owner: T) extends Field[ObjectI
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { x =>
+    net.liftweb.json.JsonAST.JString(x.toString)
+  }.openOr(net.liftweb.json.JsonAST.JNothing)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
@@ -1265,7 +1267,9 @@ class IntListField[T <: Record[T]](override val owner: T) extends Field[List[Int
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { list =>
+    net.liftweb.json.JsonAST.JArray(list.map(net.liftweb.json.JsonAST.JInt(_)))
+  }.openOr(net.liftweb.json.JsonAST.JNull)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
@@ -1310,7 +1314,9 @@ class LongListField[T <: Record[T]](override val owner: T) extends Field[List[Lo
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { list =>
+    net.liftweb.json.JsonAST.JArray(list.map(net.liftweb.json.JsonAST.JInt(_)))
+  }.openOr(net.liftweb.json.JsonAST.JNull)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
@@ -1358,7 +1364,9 @@ class ObjectIdListField[T <: Record[T]](override val owner: T) extends Field[Lis
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { list =>
+    net.liftweb.json.JsonAST.JArray(list.map(x => net.liftweb.json.JsonAST.JString(x.toString)))
+  }.openOr(net.liftweb.json.JsonAST.JNull)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
@@ -1398,7 +1406,9 @@ class StringListField[T <: Record[T]](override val owner: T) extends Field[List[
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { list =>
+    net.liftweb.json.JsonAST.JArray(list.map(net.liftweb.json.JsonAST.JString(_)))
+  }.openOr(net.liftweb.json.JsonAST.JNull)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
@@ -1446,7 +1456,9 @@ class PointField[T <: Record[T]](override val owner: T) extends Field[(Double, D
   override def toBoxMyType(a: ValueType): Box[ValueType] = Empty
   override def defaultValueBox: Box[ValueType] = Empty
   override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
-  override def asJValue: net.liftweb.json.JsonAST.JValue = net.liftweb.json.JsonAST.JNothing
+  override def asJValue: net.liftweb.json.JsonAST.JValue = e.map { x =>
+    net.liftweb.json.JsonAST.JString("%s,%s".format(x._1, x._2))
+  }.openOr(net.liftweb.json.JsonAST.JNull)
   override def asJs: net.liftweb.http.js.JsExp = net.liftweb.http.js.JE.JsNull
   override def toForm: Box[NodeSeq] = Empty
   override def set(a: ValueType) = {
