@@ -27,7 +27,12 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
    * Defaults to asJValue
    * @return JValue being saved into SOLR
    */
-  def asJValueForSolr: JValue = this.asJValue
+  def asJValueForSolr: JObject = {
+    // .toMap here prevents double keys
+    JObject(fields().map(f => f.name -> f.asJValue).toMap.map {
+      case (name, value) => JField(name, value)
+    }.toList)
+  }
 
   /**
    * Save this record to SOLR
