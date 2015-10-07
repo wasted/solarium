@@ -53,17 +53,20 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
    * @return Future Unit if all goes well
    */
   def saveToSolr(list: Iterator[T with RecordToSolr[T, PK]]): Future[Unit] = {
-    val (host, client) = meta.getClient
-    val json = Serialization.write(list.map(_.asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
-    val hdrs = Map(HttpHeaders.Names.HOST -> host)
-    val uri = new java.net.URI("http://%s%s".format(host, updatePath))
-    client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
-      val msg = resp.content().toString(CharsetUtil.UTF_8)
-      resp.release()
-      if (resp.getStatus.code() == 200) ()
-      else {
-        throw new Exception("Unable to save to backend! Status: %s Message: %s\nSent: %s".format(
-          resp.getStatus.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr))))
+    if (list.isEmpty) Future.Done
+    else {
+      val (host, client) = meta.getClient
+      val json = Serialization.write(list.map(_.asJValueForSolr).toList).getBytes(CharsetUtil.UTF_8).toSeq
+      val hdrs = Map(HttpHeaders.Names.HOST -> host)
+      val uri = new java.net.URI("http://%s%s".format(host, updatePath))
+      client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
+        val msg = resp.content().toString(CharsetUtil.UTF_8)
+        resp.release()
+        if (resp.getStatus.code() == 200) ()
+        else {
+          throw new Exception("Unable to save to backend! Status: %s Message: %s\nSent: %s".format(
+            resp.getStatus.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr).toList)))
+        }
       }
     }
   }
@@ -79,18 +82,21 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
    * @return Future Unit if all goes well
    */
   def deleteByIdsFromSolr(list: Iterator[PK]): Future[Unit] = {
-    val (host, client) = meta.getClient
-    val deleteFields = list.map(l => JField("delete", JObject(JField(primaryKeyField.name, Extraction.decompose(l)) :: Nil)))
-    val json = Serialization.write(JObject(deleteFields.toList)).getBytes(CharsetUtil.UTF_8).toSeq
-    val hdrs = Map(HttpHeaders.Names.HOST -> host)
-    val uri = new java.net.URI("http://%s%s".format(host, updatePath))
-    client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
-      val msg = resp.content().toString(CharsetUtil.UTF_8)
-      resp.release()
-      if (resp.getStatus.code() == 200) ()
-      else {
-        throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
-          resp.getStatus.code(), msg, Serialization.writePretty(JObject(deleteFields.toList))))
+    if (list.isEmpty) Future.Done
+    else {
+      val (host, client) = meta.getClient
+      val deleteFields = list.map(l => JField("delete", JObject(JField(primaryKeyField.name, Extraction.decompose(l)) :: Nil)))
+      val json = Serialization.write(JObject(deleteFields.toList)).getBytes(CharsetUtil.UTF_8).toSeq
+      val hdrs = Map(HttpHeaders.Names.HOST -> host)
+      val uri = new java.net.URI("http://%s%s".format(host, updatePath))
+      client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
+        val msg = resp.content().toString(CharsetUtil.UTF_8)
+        resp.release()
+        if (resp.getStatus.code() == 200) ()
+        else {
+          throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
+            resp.getStatus.code(), msg, Serialization.writePretty(JObject(deleteFields.toList))))
+        }
       }
     }
   }
