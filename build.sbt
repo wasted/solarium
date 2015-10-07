@@ -6,9 +6,9 @@ version := scala.io.Source.fromFile("version").mkString.trim
 
 organization := "io.wasted"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
-crossScalaVersions := Seq("2.10.5", "2.11.6")
+crossScalaVersions := Seq("2.10.5", "2.11.7")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:postfixOps", "-language:implicitConversions")
 
@@ -17,7 +17,7 @@ libraryDependencies ++= {
   Seq(
     "net.liftweb"               %% "lift-record"          % liftVer       % "compile",
     "net.liftweb"               %% "lift-json"            % liftVer       % "compile",
-    "io.wasted"                 %% "wasted-util"          % "0.10.3"      % "compile",
+    "io.wasted"                 %% "wasted-util"          % "0.10.5"      % "compile",
     "com.fasterxml.jackson.core" % "jackson-databind"     % "2.5.3"       % "compile",
     "org.mongodb"                % "bson"                 % "3.0.1"       % "compile"
       exclude("org.slf4j", "slf4j-api"),

@@ -62,7 +62,8 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
       resp.release()
       if (resp.getStatus.code() == 200) ()
       else {
-        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
+        throw new Exception("Unable to save to backend! Status: %s Message: %s\nSent: %s".format(
+          resp.getStatus.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr))))
       }
     }
   }
@@ -88,7 +89,8 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
       resp.release()
       if (resp.getStatus.code() == 200) ()
       else {
-        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
+        throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
+          resp.getStatus.code(), msg, Serialization.writePretty(JObject(deleteFields.toList))))
       }
     }
   }
