@@ -13,7 +13,7 @@ crossScalaVersions := Seq("2.10.6", "2.11.7")
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:postfixOps", "-language:implicitConversions")
 
 libraryDependencies ++= {
-  val wastedVer = "0.11.1"
+  val wastedVer = "0.11.2"
   val liftVer = "2.6.2"
   Seq(
     "net.liftweb"               %% "lift-record"          % liftVer       % "compile",
