@@ -899,6 +899,8 @@ trait SlashemField[V, M <: Record[M]] extends OwnedField[M] {
   self: Field[V, M] =>
   import Helpers._
 
+  override def asJValue: net.liftweb.json.JsonAST.JValue
+
   // Override this value to produce unanalyzed queries!
   val unanalyzed = false
 
