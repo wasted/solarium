@@ -10,6 +10,7 @@ import java.util.concurrent.{ ExecutorService, Executors }
 import com.fasterxml.jackson.annotation.{ JsonCreator, JsonProperty }
 import com.fasterxml.jackson.databind.{ DeserializationFeature, ObjectMapper }
 import com.twitter.conversions.time._
+import com.twitter.conversions.storage._
 import com.twitter.util.{ Await, Duration, Future, FuturePool }
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
@@ -294,6 +295,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   def solrRetries: Int = 1
   val requestCounter = new AtomicLong()
   val httpCodec = NettyHttpCodec[HttpRequest, FullHttpResponse]()
+    .withMaxResponseSize(20.megabytes)
     .withDecompression(decompression = false)
   protected val clients = servers.map { server =>
     server._1 -> HttpClient[FullHttpResponse]()
