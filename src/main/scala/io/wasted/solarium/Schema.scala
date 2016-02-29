@@ -289,7 +289,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   def solrName: String
 
   /* Max response size SOLR is allowed to deliver */
-  def maxResponseSize: StorageUnit = 50.megabytes
+  def maxResponseSize: StorageUnit = 5.megabytes
 
   // Params for the client
   def solrTcpConnectTimeout: Duration = 10.seconds
