@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.{ JsonCreator, JsonProperty }
 import com.fasterxml.jackson.databind.{ DeserializationFeature, ObjectMapper }
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
-import com.twitter.util.{ Await, Duration, Future, FuturePool }
+import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import io.netty.util.CharsetUtil
@@ -288,6 +288,9 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   // The name is used to determine which props to use as well as for logging
   def solrName: String
 
+  /* Max response size SOLR is allowed to deliver */
+  def maxResponseSize: StorageUnit = 50.megabytes
+
   // Params for the client
   def solrTcpConnectTimeout: Duration = 10.seconds
   def solrTimeout: Duration = 30.seconds
@@ -295,7 +298,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   def solrRetries: Int = 1
   val requestCounter = new AtomicLong()
   val httpCodec = NettyHttpCodec[HttpRequest, FullHttpResponse]()
-    .withMaxResponseSize(20.megabytes)
+    .withMaxResponseSize(maxResponseSize)
     .withDecompression(decompression = false)
   protected val clients = servers.map { server =>
     server._1 -> HttpClient[FullHttpResponse]()
@@ -391,10 +394,10 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
     request.headers.add(HttpHeaders.Names.CONTENT_TYPE, "application/x-www-form-urlencoded")
     request.headers.add(HttpHeaders.Names.CONTENT_LENGTH, bytes.length.toString)
     val uri = new java.net.URI(queryPath)
-    client.write(uri, () => request).map { response =>
+    client.write(uri, () => request).flatMap { response =>
       val r = response.getStatus match {
-        case HttpResponseStatus.OK => response.content().toString(CharsetUtil.UTF_8)
-        case status => throw SolrResponseException(status.code, status.reasonPhrase, solrName, qse.toString)
+        case HttpResponseStatus.OK => Future.value(response.content().toString(CharsetUtil.UTF_8))
+        case status => Future.exception(SolrResponseException(status.code, status.reasonPhrase, solrName, qse.toString))
       }
       response.release()
       r
