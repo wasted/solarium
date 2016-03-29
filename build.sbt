@@ -6,14 +6,14 @@ version := scala.io.Source.fromFile("version").mkString.trim
 
 organization := "io.wasted"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.6", "2.11.7")
+crossScalaVersions := Seq("2.10.6", "2.11.8")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:postfixOps", "-language:implicitConversions")
 
 libraryDependencies ++= {
-  val wastedVer = "0.11.3"
+  val wastedVer = "0.11.5"
   val liftVer = "2.6.2"
   Seq(
     "net.liftweb"               %% "lift-record"          % liftVer       % "compile",
