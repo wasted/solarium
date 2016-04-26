@@ -13,7 +13,7 @@ crossScalaVersions := Seq("2.10.6", "2.11.8")
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:postfixOps", "-language:implicitConversions")
 
 libraryDependencies ++= {
-  val wastedVer = "0.11.5"
+  val wastedVer = "0.11.6"
   val liftVer = "2.6.2"
   Seq(
     "net.liftweb"               %% "lift-record"          % liftVer       % "compile",
@@ -58,6 +58,8 @@ site.includeScaladoc()
 ghpages.settings
 
 git.remoteRepo := "git@github.com:wasted/solarium.git"
+
+isSnapshot := true
 
 resolvers ++= Seq(
   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository",

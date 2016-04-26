@@ -90,17 +90,16 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     if (list.isEmpty) Future.Done
     else {
       val (host, client) = meta.getClient
-      val deleteFields = list.map(l => JField("delete", JObject(JField(primaryKeyField.name, Extraction.decompose(l)) :: Nil)))
-      val json = Serialization.write(JObject(deleteFields.toList)).getBytes(CharsetUtil.UTF_8).toSeq
+      val delete = """{"delete":{"query":"%s:(%s)"}}""".format(primaryKeyField.name, list.mkString(" OR "))
       val hdrs = Map(HttpHeaders.Names.HOST -> host)
       val uri = new java.net.URI("http://%s%s".format(host, updatePath))
-      client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
+      client.post(uri, "application/json", delete.getBytes(CharsetUtil.UTF_8).toSeq, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
         resp.release()
         if (resp.getStatus.code() == 200) ()
         else {
           throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
-            resp.getStatus.code(), msg, Serialization.writePretty(JObject(deleteFields.toList))))
+            resp.getStatus.code(), msg, delete))
         }
       }
     }
