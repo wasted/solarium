@@ -49,8 +49,6 @@ buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
 buildInfoPackage := "io.wasted.solarium.build"
 
-net.virtualvoid.sbt.graph.Plugin.graphSettings
-
 site.settings
 
 site.includeScaladoc()
