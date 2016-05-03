@@ -42,3 +42,4 @@ lib
 # 
 src/main/resources/props/*
 *.jks
+.vagrant

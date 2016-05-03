@@ -38,7 +38,7 @@ import org.elasticsearch.search.facet.terms.TermsFacetBuilder
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet
 import org.elasticsearch.search.sort.{ ScriptSortBuilder, SortOrder }
 import org.joda.time.DateTime
-
+import net.liftweb.json._
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
@@ -987,7 +987,7 @@ trait SlashemField[V, M <: Record[M]] extends OwnedField[M] {
 }
 
 //Slashem field types
-class SlashemStringField[T <: Record[T]](owner: T) extends StringField[T](owner, 0) with SlashemField[String, T]
+class SlashemStringField[T <: Record[T]](owner: T)(implicit formats: Formats) extends StringField[T](owner, 0) with SlashemField[String, T]
 /**
  * Field type that can be queried without analyzing.
  *
@@ -996,11 +996,11 @@ class SlashemStringField[T <: Record[T]](owner: T) extends StringField[T](owner,
  *
  * @see SlashemStringField
  */
-class SlashemUnanalyzedStringField[T <: Record[T]](owner: T)
+class SlashemUnanalyzedStringField[T <: Record[T]](owner: T)(implicit formats: Formats)
   extends StringField[T](owner, 0) with SlashemUnanalyzedField[String, T]
 
 //Allows for querying against the default filed in solr. This field doesn't have a name
-class SlashemDefaultStringField[T <: Record[T]](owner: T) extends StringField[T](owner, 0) with SlashemField[String, T] {
+class SlashemDefaultStringField[T <: Record[T]](owner: T)(implicit formats: Formats) extends StringField[T](owner, 0) with SlashemField[String, T] {
   override def name = ""
 }
 class SlashemIntField[T <: Record[T]](owner: T) extends IntField[T](owner) with SlashemField[Int, T]
@@ -1036,7 +1036,7 @@ class SlashemIntListField[T <: Record[T]](owner: T) extends IntListField[T](owne
   def nin(lst: List[Int]) = Clause[Int](queryName, groupWithOr(lst.map({ i: Int => Phrase(i) })), plus = false)
 }
 
-class SlashemStringListField[T <: Record[T]](owner: T) extends StringListField[T](owner) with SlashemField[List[String], T] {
+class SlashemStringListField[T <: Record[T]](owner: T)(implicit formats: Formats) extends StringListField[T](owner) with SlashemField[List[String], T] {
   import Helpers._
   override def valueBoxFromAny(a: Any) = {
     try {
@@ -1121,7 +1121,7 @@ class SlashemPointField[T <: Record[T]](owner: T) extends PointField[T](owner) w
 class SlashemBooleanField[T <: Record[T]](owner: T) extends BooleanField[T](owner) with SlashemField[Boolean, T]
 class SlashemDateTimeField[T <: Record[T]](owner: T) extends JodaDateTimeField[T](owner) with SlashemField[DateTime, T]
 //More restrictive type so we can access the geohash
-class SlashemGeoField[T <: SlashemSchema[T]](owner: T) extends SlashemUnanalyzedStringField[T](owner) {
+class SlashemGeoField[T <: SlashemSchema[T]](owner: T)(implicit formats: Formats) extends SlashemUnanalyzedStringField[T](owner) {
   def inRadius(geoLat: Double, geoLong: Double, radiusInMeters: Int, maxCells: Int = owner.geohash.maxCells) = {
     val cellIds = owner.geohash.coverString(geoLat, geoLong, radiusInMeters, maxCells = maxCells)
     //If we have an empty cover we default to everything.
@@ -1148,19 +1148,19 @@ class SlashemGeoField[T <: SlashemSchema[T]](owner: T) extends SlashemUnanalyzed
 }
 // Legacy field name, in the future simply use Slashem*FieldName*
 //Slashem field types
-class SolrStringField[T <: Record[T]](owner: T) extends SlashemStringField[T](owner)
+class SolrStringField[T <: Record[T]](owner: T)(implicit formats: Formats) extends SlashemStringField[T](owner)
 //Allows for querying against the default filed in solr. This field doesn't have a name
-class SolrDefaultStringField[T <: Record[T]](owner: T) extends SlashemDefaultStringField[T](owner)
+class SolrDefaultStringField[T <: Record[T]](owner: T)(implicit formats: Formats) extends SlashemDefaultStringField[T](owner)
 class SolrIntField[T <: Record[T]](owner: T) extends SlashemIntField[T](owner)
 class SolrDoubleField[T <: Record[T]](owner: T) extends SlashemDoubleField[T](owner)
 class SolrLongField[T <: Record[T]](owner: T) extends SlashemLongField[T](owner)
 class SolrObjectIdField[T <: Record[T]](owner: T) extends SlashemObjectIdField[T](owner)
 class SolrIntListField[T <: Record[T]](owner: T) extends SlashemIntListField[T](owner)
 class SolrLongListField[T <: Record[T]](owner: T) extends SlashemLongListField[T](owner)
-class SolrStringListField[T <: Record[T]](owner: T) extends SlashemStringListField[T](owner)
+class SolrStringListField[T <: Record[T]](owner: T)(implicit formats: Formats) extends SlashemStringListField[T](owner)
 class SolrBooleanField[T <: Record[T]](owner: T) extends SlashemBooleanField[T](owner)
 class SolrDateTimeField[T <: Record[T]](owner: T) extends SlashemDateTimeField[T](owner)
-class SolrGeoField[T <: SlashemSchema[T]](owner: T) extends SlashemGeoField[T](owner)
+class SolrGeoField[T <: SlashemSchema[T]](owner: T)(implicit formats: Formats) extends SlashemGeoField[T](owner)
 // This insanity makes me want to 86 Record all together. DummyField allows us
 // to easily define our own Field types. I use this for ObjectId so that I don't
 // have to import all of MongoRecord. We could trivially reimplement the other
@@ -1386,7 +1386,76 @@ class ObjectIdListField[T <: Record[T]](override val owner: T) extends Field[Lis
   override def valueBox = e
 }
 
-class StringListField[T <: Record[T]](override val owner: T) extends Field[List[String], T] {
+class CaseClassField[T <: Record[T], C <: AnyRef](override val owner: T)(implicit formats: Formats, mf: Manifest[C]) extends Field[C, T] {
+  type ValueType = C
+  var e: Box[ValueType] = Empty
+  def setFromString(s: String) = JsonParser.parse(s).extractOpt[ValueType].map(set)
+  override def setFromAny(a: Any) = {
+    try {
+      a match {
+        case "" => Empty
+        case a: ValueType => setFromString(Serialization.write(a))
+        case str: String => setFromString(str)
+        case _ => Empty
+      }
+    } catch {
+      case _: Throwable => Empty
+    }
+  }
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = jv.extractOpt[ValueType]
+  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
+  override def toBoxMyType(a: ValueType) = Empty
+  override def defaultValueBox = Empty
+  override def toValueType(a: Box[MyType]) = a.openOr(null.asInstanceOf[ValueType])
+  override def asJValue = valueBox.map(x => Extraction.decompose(x)).getOrElse(JNothing)
+  override def asJs = net.liftweb.http.js.JE.JsNull
+  override def toForm = Empty
+  override def set(a: ValueType) = {
+    e = Full(a)
+    a.asInstanceOf[ValueType]
+  }
+  override def get = e.openOr(null.asInstanceOf[ValueType])
+  override def is = e.openOr(null.asInstanceOf[ValueType])
+  def value() = e getOrElse Nil
+  override def valueBox = e
+}
+
+class CaseClassListField[T <: Record[T], C <: AnyRef](override val owner: T)(implicit formats: Formats, mf: Manifest[C]) extends Field[List[C], T] {
+  type ValueType = List[C]
+  var e: Box[ValueType] = Empty
+  def setFromString(s: String) = Empty
+  override def setFromAny(a: Any) = {
+    try {
+      a match {
+        case "" => Empty
+        case arr: Array[String] => Full(arr.flatMap(JsonParser.parseOpt(_)).toList.flatMap(_.extractOpt[ValueType]).flatten)
+        case str: String => setFromString(str)
+        case ar: util.ArrayList[_] => Full(set(ar.toArray.toList.map(x => x).asInstanceOf[ValueType]))
+        case _ => Empty
+      }
+    } catch {
+      case _: Throwable => Empty
+    }
+  }
+  override def setFromJValue(jv: net.liftweb.json.JsonAST.JValue) = jv.extractOpt[ValueType]
+  override def liftSetFilterToBox(a: Box[ValueType]) = Empty
+  override def toBoxMyType(a: ValueType) = Empty
+  override def defaultValueBox = Empty
+  override def toValueType(a: Box[MyType]) = null.asInstanceOf[ValueType]
+  override def asJValue = valueBox.map(x => Extraction.decompose(x)).openOr(JNull)
+  override def asJs = net.liftweb.http.js.JE.JsNull
+  override def toForm = Empty
+  override def set(a: ValueType) = {
+    e = Full(a)
+    a.asInstanceOf[ValueType]
+  }
+  override def get = e.orNull
+  override def is = e.orNull
+  def value() = e getOrElse Nil
+  override def valueBox = e
+}
+
+class StringListField[T <: Record[T]](override val owner: T)(implicit formats: Formats) extends Field[List[String], T] {
   type ValueType = List[String]
   var e: Box[ValueType] = Empty
   def setFromString(s: String) = {
