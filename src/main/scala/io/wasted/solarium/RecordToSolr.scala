@@ -46,9 +46,9 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
       resp.release()
-      if (resp.getStatus.code() == 200) ()
+      if (resp.status.code() == 200) ()
       else {
-        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
+        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.status.code(), msg))
       }
     }
   }
@@ -67,10 +67,10 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
       client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
         resp.release()
-        if (resp.getStatus.code() == 200) ()
+        if (resp.status.code() == 200) ()
         else {
           throw new Exception("Unable to save to backend! Status: %s Message: %s\nSent: %s".format(
-            resp.getStatus.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr).toList)))
+            resp.status.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr).toList)))
         }
       }
     }
@@ -96,10 +96,10 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
       client.post(uri, "application/json", delete.getBytes(CharsetUtil.UTF_8).toSeq, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
         resp.release()
-        if (resp.getStatus.code() == 200) ()
+        if (resp.status.code() == 200) ()
         else {
           throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
-            resp.getStatus.code(), msg, delete))
+            resp.status.code(), msg, delete))
         }
       }
     }
@@ -137,9 +137,9 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     client.get(new java.net.URI("http://%s%s?commit=true".format(host, updatePath)), hdrs).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
       resp.release()
-      if (resp.getStatus.code() == 200) ()
+      if (resp.status.code() == 200) ()
       else {
-        throw new Exception("Unable to commit to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
+        throw new Exception("Unable to commit to backend! Status: %s Message: %s".format(resp.status.code(), msg))
       }
     }
   }
