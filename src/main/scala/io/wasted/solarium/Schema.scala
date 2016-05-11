@@ -294,7 +294,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   // Params for the client
   def solrTcpConnectTimeout: Duration = 10.seconds
   def solrTimeout: Duration = 30.seconds
-  def solrKeepAlive: Boolean = true
+  def solrKeepAlive: Boolean = false
   def solrRetries: Int = 1
   val requestCounter = new AtomicLong()
   val httpCodec = NettyHttpCodec[HttpRequest, FullHttpResponse]()
