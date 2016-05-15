@@ -420,11 +420,12 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
       }
     }
     redisClient.flatMap { redis =>
-      redis.get("solarium:cache:" + hash).flatMap {
+      val key = "solarium:cache:" + core.map(_ + ":").getOrElse("") + hash
+      redis.get(key).flatMap {
         case Some(str) => Future.value(str)
         case None =>
           rawRequest.onSuccess { result =>
-            redis.set("solarium:cache:" + hash, result)
+            redis.set(key, result)
           }
       }
     }.rescue {
