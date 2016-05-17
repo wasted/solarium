@@ -425,7 +425,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
         case Some(str) => Future.value(str)
         case None =>
           rawRequest.onSuccess { result =>
-            redis.set(key, result)
+            redis.setEx(key, result, redisCacheTimeout.toSeconds)
           }
       }
     }.rescue {
