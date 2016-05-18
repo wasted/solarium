@@ -1,7 +1,7 @@
 package io.wasted.solarium
 
 import com.twitter.util.Future
-import io.netty.handler.codec.http.{ FullHttpResponse, HttpHeaders, HttpMethod }
+import io.netty.handler.codec.http._
 import io.netty.util.CharsetUtil
 import net.liftweb.json._
 import net.liftweb.record.Field
@@ -41,7 +41,7 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
   def saveToSolr(): Future[Unit] = {
     val (host, client) = meta.getClient
     val json = Serialization.write(List(asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
-    val hdrs = Map(HttpHeaders.Names.HOST -> host)
+    val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
     val uri = new java.net.URI("http://%s%s".format(host, updatePath))
     client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
@@ -62,7 +62,7 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     else {
       val (host, client) = meta.getClient
       val json = Serialization.write(list.map(_.asJValueForSolr).toList).getBytes(CharsetUtil.UTF_8).toSeq
-      val hdrs = Map(HttpHeaders.Names.HOST -> host)
+      val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
       val uri = new java.net.URI("http://%s%s".format(host, updatePath))
       client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
@@ -91,7 +91,7 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     else {
       val (host, client) = meta.getClient
       val delete = """{"delete":{"query":"%s:(%s)"}}""".format(primaryKeyField.name, list.mkString(" OR "))
-      val hdrs = Map(HttpHeaders.Names.HOST -> host)
+      val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
       val uri = new java.net.URI("http://%s%s".format(host, updatePath))
       client.post(uri, "application/json", delete.getBytes(CharsetUtil.UTF_8).toSeq, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
@@ -133,7 +133,7 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
    */
   final def commitToSolr(): Future[Unit] = {
     val (host, client) = meta.getClient
-    val hdrs = Map(HttpHeaders.Names.HOST -> host)
+    val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
     client.get(new java.net.URI("http://%s%s?commit=true".format(host, updatePath)), hdrs).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
       resp.release()

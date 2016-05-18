@@ -410,7 +410,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
       request.headers.add(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded")
       request.headers.add(HttpHeaderNames.CONTENT_LENGTH, bytes.length.toString)
       val uri = new java.net.URI(queryPath)
-      client.write(uri, () => request).flatMap { response =>
+      client.write(uri, request).flatMap { response =>
         val r = response.status match {
           case HttpResponseStatus.OK => Future.value(response.content().toString(CharsetUtil.UTF_8))
           case status => Future.exception(SolrResponseException(status.code, status.reasonPhrase, solrName, qse.toString))
