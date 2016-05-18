@@ -258,7 +258,7 @@ case class QueryBuilder[M <: Record[M], Ord, Lim, MM <: MinimumMatchType, Y, H <
   /**
    * Disabled caching for this query.
    */
-  def uncached[F] = {
+  def uncached[F](): QueryBuilder[M, Ord, Lim, MM, Y, H, Q, MinFacetCount, FacetLimit, ST] = {
     val wasted = this.wasted.copy(cached = false)
     this.copy(wasted = wasted)
   }
