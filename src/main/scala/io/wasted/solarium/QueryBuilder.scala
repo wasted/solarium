@@ -70,6 +70,7 @@ case class QueryBuilder[M <: Record[M], Ord, Lim, MM <: MinimumMatchType, Y, H <
   customScoreScript: Option[(String, Map[String, Any])],
   hls: Option[String],
   pt: Option[GeoQueryLocation],
+  cached: Boolean = true,
   hlFragSize: Option[Int],
   creator: Option[((Map[String, Any], Option[Map[String, util.ArrayList[String]]])) => Y],
   fallOf: Option[Double],
@@ -252,6 +253,11 @@ case class QueryBuilder[M <: Record[M], Ord, Lim, MM <: MinimumMatchType, Y, H <
   def geoQuery[F](f: M => SlashemField[F, M], lat: Double, lng: Double, distance: Int, bbox: Boolean = false): QueryBuilder[M, Ord, Lim, MM, Y, H, Q, MinFacetCount, FacetLimit, ST] = {
     this.copy(pt = Some(GeoQueryLocation(lat, lng, f(meta).name, distance, bbox)))
   }
+
+  /**
+    * Disabled caching for this query.
+    */
+  def uncached[F] = this.copy(cached = false)
 
   // Right now we only support ordering by field
   // TODO: Support ordering by function query
