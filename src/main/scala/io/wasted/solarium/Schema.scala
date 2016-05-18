@@ -113,8 +113,8 @@ case class Response[T <: Record[T], Y](schema: T, creator: Option[Response.RawDo
 
   /**
    * Collect results which are of a high enough lucene score to be relevant.
-    *
-    * @param rawDocs List of Docs to be filtered
+   *
+   * @param rawDocs List of Docs to be filtered
    * @see RawDoc
    */
   private def filterHighQuality(rawDocs: Array[Response.RawDoc]): Array[Response.RawDoc] = {
@@ -328,8 +328,8 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
 
   /**
    * Gets a HTTP Client for this and returns the Hostname (for Host-Header) as a tuple
-    *
-    * @return (Hostname, Client)
+   *
+   * @return (Hostname, Client)
    */
   def getClient: (String, HttpClient[FullHttpResponse]) = clients((requestCounter.incrementAndGet() % clients.length).toInt)
 
@@ -520,7 +520,7 @@ trait SlashemSchema[M <: Record[M]] extends Record[M] {
         facetMinCount = None,
         facetLimit = None,
         facetQuery = List()),
-      customScoreScript = None, hls = None, pt = None, hlFragSize = None, creator = None,
+      customScoreScript = None, hls = None, wasted = WastedConfig(), hlFragSize = None, creator = None,
       fallOf = None, min = None)
   }
   def query[Ord, Lim, MM <: MinimumMatchType, Y, H <: Highlighting, Q <: QualityFilter, FC <: FacetCount, FLim, ST <: ScoreType](timeout: Duration, qb: QueryBuilder[M, Ord, Lim, MM, Y, H, Q, FC, FLim, ST]): SearchResults[M, Y]
@@ -865,22 +865,22 @@ trait SolrSchema[M <: Record[M]] extends SlashemSchema[M] {
     val f = qb.filters.map({ x => "fq" -> x.extend })
 
     val facetq = qb.facetSettings.facetQuery.flatMap(fq => List("facet.query" -> fq))
-    val fl = (qb.pt, qb.fieldsToFetch) match {
+    val fl = (qb.wasted.pt, qb.fieldsToFetch) match {
       case (Some(a), Nil) => List("fl" -> "*,_dist_:geodist()")
       case (None, Nil) => Nil
       case (Some(a), x) => List("fl" -> (x.filterNot(_ == "geodist()") ++ List("_dist_:geodist()") mkString ","))
       case (None, x) => List("fl" -> x.mkString(","))
     }
 
-    val s = (qb.pt, qb.sort) match {
+    val s = (qb.wasted.pt, qb.sort) match {
       case (_, None) => Nil
       case (None, Some(sort)) => List("sort" -> (sort._1.boost + " " + sort._2))
       case (Some(a), Some(sort)) => List("sort" -> (sort._1.boost().replaceAll("_dist_", "geodist()") + " " + sort._2))
     }
 
-    val uncached = if (!qb.cached) List.empty else List("uncached" -> "true")
+    val uncached = if (!qb.wasted.cached) List.empty else List("uncached" -> "true")
 
-    val ptq = qb.pt match {
+    val ptq = qb.wasted.pt match {
       case None => Nil
       case Some(a) =>
         val res = List(
@@ -1068,8 +1068,8 @@ class SlashemIntListField[T <: Record[T]](owner: T) extends IntListField[T](owne
   }
   /**
    * See if this list has any elements in that list.
-    *
-    * @param lst the list to check for any intersections.
+   *
+   * @param lst the list to check for any intersections.
    */
   def in(lst: List[Int]) = Clause[Int](queryName, groupWithOr(lst.map({ i: Int => Phrase(i) })))
   def nin(lst: List[Int]) = Clause[Int](queryName, groupWithOr(lst.map({ i: Int => Phrase(i) })), plus = false)
@@ -1095,8 +1095,8 @@ class SlashemStringListField[T <: Record[T]](owner: T)(implicit formats: Formats
   }
   /**
    * See if this list has any elements in that list.
-    *
-    * @param v the list to check for any intersections.
+   *
+   * @param v the list to check for any intersections.
    */
   def in(v: List[String]) = Clause[String](queryName, groupWithOr(v.map({ s: String => Phrase(s) })))
   def nin(v: List[String]) = Clause[String](queryName, groupWithOr(v.map({ s: String => Phrase(s) })), plus = false)
@@ -1122,8 +1122,8 @@ class SlashemLongListField[T <: Record[T]](owner: T) extends LongListField[T](ow
   }
   /**
    * See if this list has any elements in that list.
-    *
-    * @param lst the list to check for any intersections.
+   *
+   * @param lst the list to check for any intersections.
    */
   def in(lst: List[Long]) = Clause[Long](queryName, groupWithOr(lst.map({ l: Long => Phrase(l) })))
   def nin(lst: List[Long]) = Clause[Long](queryName, groupWithOr(lst.map({ l: Long => Phrase(l) })), plus = false)
@@ -1137,8 +1137,8 @@ class SlashemObjectIdListField[T <: Record[T]](owner: T) extends ObjectIdListFie
   }
   /**
    * See if this list has any elements in that list.
-    *
-    * @param lst the list to check for any intersections.
+   *
+   * @param lst the list to check for any intersections.
    */
   def in(lst: List[ObjectId]) = Clause[ObjectId](queryName, groupWithOr(lst.map({ oid: ObjectId => Phrase(oid) })))
   def nin(lst: List[ObjectId]) = Clause[ObjectId](queryName, groupWithOr(lst.map({ oid: ObjectId => Phrase(oid) })), plus = false)
