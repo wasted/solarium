@@ -889,7 +889,7 @@ trait SolrSchema[M <: Record[M]] extends SlashemSchema[M] {
           "pt" -> "%s,%s".format(a.lat, a.lng))
         if (!a.bbox) res else res ++ List("fq" -> "{!bbox}")
       case (None, Some(a)) =>
-        List("fq" -> "store:[%s,%s TO %s,%s]".format(a.northEast._1, a.northEast._2, a.southWest._1, a.southWest._2))
+        List("fq" -> "%s:[%s,%s TO %s,%s]".format(a.field, a.northEast._2, a.northEast._1, a.southWest._2, a.southWest._1))
     }
 
     t ++ mm ++ qt ++ bq ++ qf ++ p ++ s ++ f ++ facetq ++ pf ++ fl ++ bf ++ hlp ++ ff ++ fs ++ ptq ++ uncached
