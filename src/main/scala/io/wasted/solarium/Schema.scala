@@ -880,14 +880,16 @@ trait SolrSchema[M <: Record[M]] extends SlashemSchema[M] {
 
     val uncached = if (!qb.wasted.cached) List.empty else List("uncached" -> "true")
 
-    val ptq = qb.wasted.pt match {
-      case None => Nil
-      case Some(a) =>
+    val ptq = (qb.wasted.pt, qb.wasted.bbox) match {
+      case (None, None) => Nil
+      case (Some(a), _) =>
         val res = List(
           "sfield" -> a.field,
           "d" -> a.distance.toString,
           "pt" -> "%s,%s".format(a.lat, a.lng))
         if (!a.bbox) res else res ++ List("fq" -> "{!bbox}")
+      case (None, Some(a)) =>
+        List("fq" -> "store:[%s,%s TO %s,%s]".format(a.northEast._1, a.northEast._2, a.southWest._1, a.southWest._2))
     }
 
     t ++ mm ++ qt ++ bq ++ qf ++ p ++ s ++ f ++ facetq ++ pf ++ fl ++ bf ++ hlp ++ ff ++ fs ++ ptq ++ uncached

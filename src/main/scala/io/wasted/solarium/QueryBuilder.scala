@@ -47,8 +47,9 @@ object FacetMethod extends Enumeration {
   val Fcs = Value("fcs")
 }
 
-case class WastedConfig(pt: Option[GeoQueryLocation] = None, cached: Boolean = true)
+case class WastedConfig(pt: Option[GeoQueryLocation] = None, bbox: Option[GeoQueryBoundingBox] = None, cached: Boolean = true)
 case class GeoQueryLocation(lat: Double, lng: Double, field: String, distance: Int, bbox: Boolean = false)
+case class GeoQueryBoundingBox(northEast: (Double, Double), southWest: (Double, Double))
 case class FacetSettings(facetFieldList: List[Field], facetMinCount: Option[Int], facetLimit: Option[Int],
                          facetQuery: List[String], facetMethod: FacetMethod.Value = FacetMethod.Enum)
 
@@ -252,6 +253,17 @@ case class QueryBuilder[M <: Record[M], Ord, Lim, MM <: MinimumMatchType, Y, H <
    */
   def geoQuery[F](f: M => SlashemField[F, M], lat: Double, lng: Double, distance: Int, bbox: Boolean = false): QueryBuilder[M, Ord, Lim, MM, Y, H, Q, MinFacetCount, FacetLimit, ST] = {
     val wasted = this.wasted.copy(pt = Some(GeoQueryLocation(lat, lng, f(meta).name, distance, bbox)))
+    this.copy(wasted = wasted)
+  }
+
+  /**
+   * A geo query using a bounding box
+   * @param f Search field
+   * @param northEast Latitude and Longitude of NorthEast Corner
+   * @param southWest Latitude and Longitude of SouthWest Corner
+   */
+  def boundingBoxQuery[F](f: M => SlashemField[F, M], northEast: (Double, Double), southWest: (Double, Double)): QueryBuilder[M, Ord, Lim, MM, Y, H, Q, MinFacetCount, FacetLimit, ST] = {
+    val wasted = this.wasted.copy(bbox = Some(GeoQueryBoundingBox(northEast, southWest)))
     this.copy(wasted = wasted)
   }
 
