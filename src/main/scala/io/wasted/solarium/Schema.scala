@@ -19,7 +19,6 @@ import io.netty.util.CharsetUtil
 import io.wasted.solarium.Ast.{ Clause, Query, ScoreBoost, _ }
 import io.wasted.util._
 import io.wasted.util.http._
-import io.wasted.util.redis.{ NettyRedisChannel, RedisClient }
 import net.liftweb.common.{ Box, Empty, Full }
 import net.liftweb.record.field.{ BooleanField, DoubleField, IntField, LongField, StringField }
 import net.liftweb.record.{ Field, MetaRecord, OwnedField, Record }
@@ -268,8 +267,6 @@ trait ElasticMeta[T <: Record[T]] extends SlashemMeta[T] {
   }
 }
 
-private[solarium] class RedisDisabledException(forClass: String) extends Exception("Redis has not been enabled for " + forClass) with scala.util.control.NoStackTrace
-
 /** Solr MetaRecord */
 trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
   self: MetaRecord[T] with T =>
@@ -316,14 +313,6 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
       .withTcpNoDelay(tcpNoDelay = true)
       .withRetries(solrRetries)
       .connectTo(server._1, server._2)
-  }
-
-  def redisCacheTimeout: Duration = 10.minutes
-  def redisCacheHosts: List[InetSocketAddress] = List.empty
-  lazy val redisClient: Future[NettyRedisChannel] = if (redisCacheHosts.isEmpty) {
-    Future.exception(new RedisDisabledException(getClass.getSimpleName))
-  } else {
-    RedisClient().connectTo(redisCacheHosts).open()
   }
 
   /**
@@ -409,12 +398,12 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
     def rawRequest = {
       val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, queryPath, Unpooled.wrappedBuffer(bytes))
       val (host, client) = getClient
-      request.headers.add(HttpHeaderNames.HOST, host)
-      request.headers.add(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded")
-      request.headers.add(HttpHeaderNames.CONTENT_LENGTH, bytes.length.toString)
+      request.headers.add(HttpHeaders.Names.HOST, host)
+      request.headers.add(HttpHeaders.Names.CONTENT_TYPE, "application/x-www-form-urlencoded")
+      request.headers.add(HttpHeaders.Names.CONTENT_LENGTH, bytes.length.toString)
       val uri = new java.net.URI(queryPath)
-      client.write(uri, request).flatMap { response =>
-        val r = response.status match {
+      client.write(uri, () => request).flatMap { response =>
+        val r = response.getStatus match {
           case HttpResponseStatus.OK => Future.value(response.content().toString(CharsetUtil.UTF_8))
           case status => Future.exception(SolrResponseException(status.code, status.reasonPhrase, solrName, qse.toString))
         }
@@ -422,22 +411,7 @@ trait SolrMeta[T <: Record[T]] extends SlashemMeta[T] {
         r
       }
     }
-    if (params.contains(("uncached", true))) rawRequest
-    else {
-      redisClient.flatMap { redis =>
-        val key = "solarium:cache:" + core.map(_ + ":").getOrElse("") + hash
-        redis.get(key).flatMap {
-          case Some(str) => Future.value(str)
-          case None =>
-            rawRequest.onSuccess { result =>
-              redis.setEx(key, result, redisCacheTimeout.toSeconds)
-            }
-        }
-      }.rescue {
-        case t: RedisDisabledException => rawRequest
-        case t: Throwable => Future.exception(t)
-      }
-    }
+    rawRequest
   }
 
 }

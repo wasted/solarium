@@ -41,14 +41,14 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
   def saveToSolr(): Future[Unit] = {
     val (host, client) = meta.getClient
     val json = Serialization.write(List(asJValueForSolr)).getBytes(CharsetUtil.UTF_8).toSeq
-    val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
+    val hdrs = Map(HttpHeaders.Names.HOST.toString() -> host)
     val uri = new java.net.URI("http://%s%s".format(host, updatePath))
     client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
       resp.release()
-      if (resp.status.code() == 200) ()
+      if (resp.getStatus.code() == 200) ()
       else {
-        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.status.code(), msg))
+        throw new Exception("Unable to save to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
       }
     }
   }
@@ -62,15 +62,15 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     else {
       val (host, client) = meta.getClient
       val json = Serialization.write(list.map(_.asJValueForSolr).toList).getBytes(CharsetUtil.UTF_8).toSeq
-      val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
+      val hdrs = Map(HttpHeaders.Names.HOST.toString() -> host)
       val uri = new java.net.URI("http://%s%s".format(host, updatePath))
       client.post(uri, "application/json", json, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
         resp.release()
-        if (resp.status.code() == 200) ()
+        if (resp.getStatus.code() == 200) ()
         else {
           throw new Exception("Unable to save to backend! Status: %s Message: %s\nSent: %s".format(
-            resp.status.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr).toList)))
+            resp.getStatus.code(), msg, Serialization.writePretty(list.map(_.asJValueForSolr).toList)))
         }
       }
     }
@@ -91,15 +91,15 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
     else {
       val (host, client) = meta.getClient
       val delete = """{"delete":{"query":"%s:(%s)"}}""".format(primaryKeyField.name, list.mkString(" OR "))
-      val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
+      val hdrs = Map(HttpHeaders.Names.HOST.toString() -> host)
       val uri = new java.net.URI("http://%s%s".format(host, updatePath))
       client.post(uri, "application/json", delete.getBytes(CharsetUtil.UTF_8).toSeq, hdrs, HttpMethod.POST).map { resp =>
         val msg = resp.content().toString(CharsetUtil.UTF_8)
         resp.release()
-        if (resp.status.code() == 200) ()
+        if (resp.getStatus.code() == 200) ()
         else {
           throw new Exception("Unable to delete from backend! Status: %s Message: %s\nSent: %s".format(
-            resp.status.code(), msg, delete))
+            resp.getStatus.code(), msg, delete))
         }
       }
     }
@@ -133,13 +133,13 @@ trait RecordToSolr[T <: SolrSchema[T], PK] { this: SolrSchema[T] =>
    */
   final def commitToSolr(): Future[Unit] = {
     val (host, client) = meta.getClient
-    val hdrs = Map(HttpHeaderNames.HOST.toString() -> host)
+    val hdrs = Map(HttpHeaders.Names.HOST.toString() -> host)
     client.get(new java.net.URI("http://%s%s?commit=true".format(host, updatePath)), hdrs).map { resp =>
       val msg = resp.content().toString(CharsetUtil.UTF_8)
       resp.release()
-      if (resp.status.code() == 200) ()
+      if (resp.getStatus.code() == 200) ()
       else {
-        throw new Exception("Unable to commit to backend! Status: %s Message: %s".format(resp.status.code(), msg))
+        throw new Exception("Unable to commit to backend! Status: %s Message: %s".format(resp.getStatus.code(), msg))
       }
     }
   }
